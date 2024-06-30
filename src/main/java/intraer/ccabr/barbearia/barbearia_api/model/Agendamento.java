@@ -22,7 +22,7 @@ public class Agendamento {
     private LocalTime hora;
     private String diaSemana;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "militar_id")
     private Militar militar;
 }

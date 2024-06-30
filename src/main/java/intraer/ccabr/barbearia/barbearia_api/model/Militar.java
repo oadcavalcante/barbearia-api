@@ -1,6 +1,5 @@
 package intraer.ccabr.barbearia.barbearia_api.model;
 
-import intraer.ccabr.barbearia.barbearia_api.dto.DadosAgendamentoMilitar;
 import jakarta.persistence.*;
 import lombok.*;
 

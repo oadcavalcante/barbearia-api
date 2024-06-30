@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API da Barbearia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+          font-family: "Rubik", Arial, sans-serif;
+          background-color: #f4f4f9;
+          margin: 0;
+          padding: 20px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          text-align: center;
+        }
+        h1 {
+          color: #333;
+          margin-bottom: 20px;
+        }
+        .main-container {
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          gap: 20px;
+          width: 100%;
+          max-width: 1200px;
+        }
+        .container {
+          background: #fff;
+          padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          width: 100%;
+          max-width: 500px;
+        }
+        .crud-method {
+          padding: 10px;
+          border-radius: 5px;
+          margin: 10px 0;
+          color: #fff;
+          font-weight: bold;
+        }
+        .get {
+          background-color: #00171f;
+        }
+        .post {
+          background-color: #003459;
+        }
+        .put {
+          background-color: #007ea7;
+        }
+        .delete {
+          background-color: #00a8e8;
+        }
+        .route {
+          font-size: 1em;
+          margin: 5px 0;
+          display: inline-block;
+          background: #f4f4f9;
+          padding: 5px 10px;
+          border-radius: 5px;
+          border: 1px solid #ddd;
+          color: #333;
+        }
+        p {
+          margin: 5px 0;
+          font-size: 1.5em;
+        }
+        .nao-disponivel {
+            font-weight: 100;
+            font-size: 0.5em;
+        }
+    </style>
+</head>
+<body>
+<h1>API da Barbearia</h1>
+<div class="main-container">
+    <div class="container">
+        <h2>/api/agendamentos</h2>
+        <div class="crud-method get">
+            <p>GET</p>
+            <p class="route">/api/agendamentos</p>
+            <p class="route">/api/agendamentos/{id}</p>
+        </div>
+        <div class="crud-method post">
+            <p>POST</p>
+            <p class="route">/api/agendamentos</p>
+        </div>
+        <div class="crud-method put">
+            <p>PUT <small class="nao-disponivel">(não disponível no momento)</small></p>
+            <p class="route">/api/agendamentos/{id}</p>
+        </div>
+        <div class="crud-method delete">
+            <p>DELETE</p>
+            <p class="route">/api/agendamentos/{id}</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>/api/militares</h2>
+        <div class="crud-method get">
+            <p>GET</p>
+            <p class="route">/api/militares</p>
+            <p class="route">/api/militares/{id}</p>
+        </div>
+        <div class="crud-method post">
+            <p>POST</p>
+            <p class="route">/api/militares</p>
+        </div>
+        <div class="crud-method put">
+            <p>PUT <small class="nao-disponivel">(não disponível no momento)</small></p>
+            <p class="route">/api/militares/{id}</p>
+        </div>
+        <div class="crud-method delete">
+            <p>DELETE</p>
+            <p class="route">/api/militares/{id}</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
