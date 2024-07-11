@@ -1,7 +1,7 @@
-package intraer.ccabr.barbearia.barbearia_api.controller;
+package intraer.ccabr.barbearia.barbearia_api.controllers;
 
-import intraer.ccabr.barbearia.barbearia_api.model.Agendamento;
-import intraer.ccabr.barbearia.barbearia_api.service.AgendamentoService;
+import intraer.ccabr.barbearia.barbearia_api.domain.agendamento.Agendamento;
+import intraer.ccabr.barbearia.barbearia_api.services.AgendamentoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

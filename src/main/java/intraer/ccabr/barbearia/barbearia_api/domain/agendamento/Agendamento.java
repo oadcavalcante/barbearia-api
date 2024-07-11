@@ -1,6 +1,7 @@
-package intraer.ccabr.barbearia.barbearia_api.model;
+package intraer.ccabr.barbearia.barbearia_api.domain.agendamento;
 
 
+import intraer.ccabr.barbearia.barbearia_api.domain.militar.Militar;
 import jakarta.persistence.*;
 import lombok.*;
 

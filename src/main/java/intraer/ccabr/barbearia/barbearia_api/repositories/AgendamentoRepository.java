@@ -1,11 +1,10 @@
-package intraer.ccabr.barbearia.barbearia_api.repository;
+package intraer.ccabr.barbearia.barbearia_api.repositories;
 
-import intraer.ccabr.barbearia.barbearia_api.model.Agendamento;
+import intraer.ccabr.barbearia.barbearia_api.domain.agendamento.Agendamento;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Optional;
 
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> {
 

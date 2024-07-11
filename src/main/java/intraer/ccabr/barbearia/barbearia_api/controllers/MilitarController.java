@@ -1,7 +1,7 @@
-package intraer.ccabr.barbearia.barbearia_api.controller;
+package intraer.ccabr.barbearia.barbearia_api.controllers;
 
-import intraer.ccabr.barbearia.barbearia_api.model.Militar;
-import intraer.ccabr.barbearia.barbearia_api.service.MilitarService;
+import intraer.ccabr.barbearia.barbearia_api.domain.militar.Militar;
+import intraer.ccabr.barbearia.barbearia_api.services.MilitarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

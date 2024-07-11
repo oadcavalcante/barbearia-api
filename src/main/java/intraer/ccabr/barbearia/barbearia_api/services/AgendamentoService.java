@@ -1,9 +1,9 @@
-package intraer.ccabr.barbearia.barbearia_api.service;
+package intraer.ccabr.barbearia.barbearia_api.services;
 
-import intraer.ccabr.barbearia.barbearia_api.model.Agendamento;
-import intraer.ccabr.barbearia.barbearia_api.model.Militar;
-import intraer.ccabr.barbearia.barbearia_api.repository.AgendamentoRepository;
-import intraer.ccabr.barbearia.barbearia_api.repository.MilitarRepository;
+import intraer.ccabr.barbearia.barbearia_api.domain.agendamento.Agendamento;
+import intraer.ccabr.barbearia.barbearia_api.domain.militar.Militar;
+import intraer.ccabr.barbearia.barbearia_api.repositories.AgendamentoRepository;
+import intraer.ccabr.barbearia.barbearia_api.repositories.MilitarRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

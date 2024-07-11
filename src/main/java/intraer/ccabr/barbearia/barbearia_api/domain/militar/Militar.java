@@ -1,4 +1,4 @@
-package intraer.ccabr.barbearia.barbearia_api.model;
+package intraer.ccabr.barbearia.barbearia_api.domain.militar;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,6 +1,6 @@
-package intraer.ccabr.barbearia.barbearia_api.repository;
+package intraer.ccabr.barbearia.barbearia_api.repositories;
 
-import intraer.ccabr.barbearia.barbearia_api.model.Militar;
+import intraer.ccabr.barbearia.barbearia_api.domain.militar.Militar;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
