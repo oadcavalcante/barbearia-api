@@ -1,4 +1,4 @@
-package intraer.ccabr.barbearia.barbearia_api.config;
+package intraer.ccabr.barbearia.barbearia_api.infra.cors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Mapeia todos os endpoints
-                        .allowedOrigins("http://localhost:4200") // Substitua pelo domínio permitido
+                        .allowedOrigins("http://localhost:4200") // Permite a origem do frontend
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Métodos permitidos
                         .allowedHeaders("*") // Headers permitidos
                         .allowCredentials(true); // Permitir envio de cookies
