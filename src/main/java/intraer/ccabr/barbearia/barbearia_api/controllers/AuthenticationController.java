@@ -1,6 +1,7 @@
 package intraer.ccabr.barbearia.barbearia_api.controllers;
 
 import intraer.ccabr.barbearia.barbearia_api.domain.user.*;
+import intraer.ccabr.barbearia.barbearia_api.dtos.LdapUserDataDTO;
 import intraer.ccabr.barbearia.barbearia_api.infra.security.TokenService;
 import intraer.ccabr.barbearia.barbearia_api.repositories.UserRepository;
 import jakarta.validation.Valid;
@@ -19,10 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.naming.Context;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import java.util.Hashtable;
+import javax.naming.directory.*;
+import java.util.*;
 
 @RestController
 @RequestMapping("auth")
@@ -42,29 +43,101 @@ public class AuthenticationController {
     @Autowired
     private TokenService tokenService;
 
+    //POST de Login
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthenticationDTO data) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
-
         try {
-            var auth = this.authenticationManager.authenticate(usernamePassword);
-            var token = tokenService.generateToken((User) auth.getPrincipal());
-            return ResponseEntity.ok(new LoginResponseDTO(token));
-        } catch (AuthenticationException exception) {
-            if (this.autenticarPeloLdap(data.login(), data.password())) {
-                UserDetails user = userRepository.findByLogin(data.login());
-                if (user == null) {
-                    String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-                    user = new User(data.login(), encryptedPassword, UserRole.USER);
-                    userRepository.save((User) user);
-                }
-                var token = tokenService.generateToken((User) user);
-                return ResponseEntity.ok(new LoginResponseDTO(token));
+            // Tenta autenticar via LDAP
+            ResponseEntity<LoginResponseDTO> ldapAuthResponse = authenticateViaLdap(data);
+            if (ldapAuthResponse != null) {
+                return ldapAuthResponse;
             }
+
+            // Tenta autenticar localmente
+            ResponseEntity<LoginResponseDTO> localAuthResponse = authenticateLocally(data);
+            if (localAuthResponse != null) {
+                return localAuthResponse;
+            }
+
+            // Se ambas as autenticações falharem, retorna UNAUTHORIZED
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (AuthenticationException exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
+    //Autenticação via LDAP.
+    private ResponseEntity<LoginResponseDTO> authenticateViaLdap(AuthenticationDTO data) {
+        DirContext ctx = null;
+        try {
+            Hashtable<String, String> env = new Hashtable<>();
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            env.put(Context.PROVIDER_URL, this.ldapHost);
+            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+            env.put(Context.SECURITY_PRINCIPAL, "uid=" + data.login() + "," + this.ldapBase);
+            env.put(Context.SECURITY_CREDENTIALS, data.password());
+
+            ctx = new InitialDirContext(env);
+            System.out.println("LDAP conectado com sucesso");
+
+            // Obter dados do LDAP
+            ArrayList<Map<String, String>> dadosLdap = getDadosLdap(data.login(), data.password(), ctx);
+
+            List<LdapUserDataDTO> ldapUserDataList = new ArrayList<>();
+            System.out.println("dadosLdap: " + dadosLdap);
+
+            for (Map<String, String> ldapData : dadosLdap) {
+                LdapUserDataDTO ldapUserData = new LdapUserDataDTO();
+                ldapUserData.setFabGuerra(ldapData.get("FABguerra"));
+                ldapUserData.setFabPostoGrad(ldapData.get("FABpostograd"));
+                ldapUserData.setFabOM(ldapData.get("FABom"));
+                ldapUserData.setFabMail(ldapData.get("mail"));
+                ldapUserData.setFabUid(ldapData.get("uid"));
+                ldapUserData.setFabNrOrdem(ldapData.get("FABnrordem"));
+
+                ldapUserDataList.add(ldapUserData);
+
+                System.out.println("FABguerra: " + ldapUserData.getFabGuerra());
+                System.out.println("FABpostograd: " + ldapUserData.getFabPostoGrad());
+                System.out.println("FABom: " + ldapUserData.getFabOM());
+                System.out.println("mail: " + ldapUserData.getFabMail());
+                System.out.println("uid: " + ldapUserData.getFabUid());
+                System.out.println("FABnrordem: " + ldapUserData.getFabNrOrdem());
+            }
+
+            UserDetails user = userRepository.findByLogin(data.login());
+            if (user == null) {
+                String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
+                user = new User(data.login(), encryptedPassword, UserRole.USER);
+                userRepository.save((User) user);
+            }
+            var token = tokenService.generateToken((User) user);
+            LoginResponseDTO responseDTO = new LoginResponseDTO(token);
+            return ResponseEntity.ok(responseDTO);
+
+        } catch (NamingException e) {
+            System.out.println("Erro ao conectar no LDAP");
+            return null;
+        } finally {
+            if (ctx != null) {
+                try {
+                    ctx.close();
+                } catch (NamingException e) {
+                    System.out.println("Erro ao fechar contexto LDAP");
+                }
+            }
+        }
+    }
+
+    //Autenticação via banco.
+    private ResponseEntity<LoginResponseDTO> authenticateLocally(AuthenticationDTO data) {
+        var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
+        var auth = this.authenticationManager.authenticate(usernamePassword);
+        var token = tokenService.generateToken((User) auth.getPrincipal());
+        return ResponseEntity.ok(new LoginResponseDTO(token));
+    }
+
+    //POST de cadastro.
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterDTO data){
         if(this.userRepository.findByLogin(data.login()) != null) {
@@ -78,22 +151,41 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Usuário registrado com sucesso");
     }
 
-    private Boolean autenticarPeloLdap(String user, String senha) {
-            try {
-                Hashtable<String, String> env = new Hashtable<>();
-                env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-                env.put(Context.PROVIDER_URL, this.ldapHost);
-                env.put(Context.SECURITY_AUTHENTICATION, "simple");
-                env.put(Context.SECURITY_PRINCIPAL, "uid=" + user + "," + this.ldapBase);
-                env.put(Context.SECURITY_CREDENTIALS, senha);
+    private ArrayList<Map<String, String>> getDadosLdap(String user, String senha, DirContext ctx) {
+        ArrayList<Map<String, String>> dadosLdap = new ArrayList<>();
 
-                DirContext ctx = new InitialDirContext(env);
-                System.out.println("Bind LDAP estabelecido com sucesso");
-                ctx.close();
-                return true;
-            } catch (NamingException e) {
-                System.out.println("Erro ao estabelecer bind LDAP");
-                return false;
+        try {
+            SearchControls searchControls = new SearchControls();
+            searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+            NamingEnumeration<SearchResult> results = ctx.search(ldapBase, "(uid=" + user + ")", searchControls);
+
+            while (results.hasMore()) {
+                SearchResult searchResult = results.next();
+                //Mostra os atributos do usuário LDAP
+                //System.out.println("Encontrado: " + searchResult.getAttributes());
+
+                Attributes attrs = searchResult.getAttributes();
+                Map<String, String> ldapData = new HashMap<>();
+
+                ldapData.put("FABpostograd", getStringAttribute(attrs, "FABpostograd"));
+                ldapData.put("FABguerra", getStringAttribute(attrs, "FABguerra"));
+                ldapData.put("FABom", getStringAttribute(attrs, "FABom"));
+                ldapData.put("mail", getStringAttribute(attrs, "mail"));
+                ldapData.put("uid", getStringAttribute(attrs, "uid"));
+                ldapData.put("FABnrordem", getStringAttribute(attrs, "FABnrordem"));
+
+                dadosLdap.add(ldapData);
+            }
+        } catch (NamingException e) {
+            System.out.println("Erro ao realizar busca LDAP");
+            e.printStackTrace();
         }
+        return dadosLdap;
+    }
+
+    private String getStringAttribute(Attributes attrs, String attributeName) throws NamingException {
+        Attribute attr = attrs.get(attributeName);
+        return (attr != null) ? (String) attr.get() : null;
     }
 }
