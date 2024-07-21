@@ -23,7 +23,7 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("barbearia-api")
                     .withSubject(user.getLogin())
-                    .withExpiresAt(genExpirationDate())
+//                    .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Erro ao gerar o token", exception);
