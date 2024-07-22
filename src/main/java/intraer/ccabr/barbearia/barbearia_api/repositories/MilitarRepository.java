@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface MilitarRepository extends JpaRepository<Militar, Long> {
 
     // verifica se o determinado militar já existe na determinada organização militar (OM)
-    Optional<Militar> findByNomeGuerraAndOm(String nomeGuerra, String om);
+    Optional<Militar> findBySaramAndGradpostoAndNomeGuerraAndOm(String saram, String gradposto, String nomeGuerra, String om);
 
     @Query("SELECT m FROM Militar m WHERE LOWER(m.categoria) = LOWER(:categoria)")
     List<Militar> findByCategoria(String categoria);

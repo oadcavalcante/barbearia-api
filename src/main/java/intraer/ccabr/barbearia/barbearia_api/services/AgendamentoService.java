@@ -27,7 +27,7 @@ public class AgendamentoService {
     public Agendamento save(Agendamento agendamento) {
         Militar militar = agendamento.getMilitar();
         // Verifica se o militar já existe na mesma OM.
-        Optional<Militar> existingMilitar = militarRepository.findByNomeGuerraAndOm(militar.getNomeGuerra(), militar.getOm());
+        Optional<Militar> existingMilitar = militarRepository.findBySaramAndGradpostoAndNomeGuerraAndOm(militar.getSaram(), militar.getGradposto(), militar.getNomeGuerra(), militar.getOm());
         if (existingMilitar.isPresent()) {
             // Militar já existe, reutiliza a instância existente.
             agendamento.setMilitar(existingMilitar.get());
