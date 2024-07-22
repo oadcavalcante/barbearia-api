@@ -34,6 +34,7 @@ public class AgendamentoService {
         } else {
             // Militar não existe, salva uma nova instância.
             militar = militarRepository.save(militar);
+
             agendamento.setMilitar(militar);
         }
         // Salva o agendamento.
@@ -57,7 +58,7 @@ public class AgendamentoService {
     }
 
     // Verifica de acordo com a 'data', 'hora' e 'dia da semana' se o agendamento pode ser feito.
-    public boolean isAgendamentoDisponivel(LocalDate data, LocalTime hora, String diaSemana) {
-        return !agendamentoRepository.existsByDataAndHoraAndDiaSemana(data, hora, diaSemana);
+    public boolean isAgendamentoDisponivel(LocalDate data, LocalTime hora, String diaSemana, String categoria) {
+        return !agendamentoRepository.existsByDataAndHoraAndDiaSemanaAndCategoria(data, hora, diaSemana, categoria);
     }
 }

@@ -26,4 +26,5 @@ public class Agendamento {
     @ManyToOne
     @JoinColumn(name = "militar_id")
     private Militar militar;
+    private String categoria;
 }

@@ -21,7 +21,7 @@ public class AgendamentoController {
     @PostMapping
     public ResponseEntity<Agendamento> save(@RequestBody Agendamento agendamento) {
         try {
-            if (agendamentoService.isAgendamentoDisponivel(agendamento.getData(), agendamento.getHora(), agendamento.getDiaSemana())) {
+            if (agendamentoService.isAgendamentoDisponivel(agendamento.getData(), agendamento.getHora(), agendamento.getDiaSemana(), agendamento.getCategoria())) {
                 Agendamento savedAgendamento = agendamentoService.save(agendamento);
                 return new ResponseEntity<>(savedAgendamento, HttpStatus.CREATED); //status 201
             } else {

@@ -4,7 +4,8 @@ CREATE TABLE agendamentos (
     hora TIME NOT NULL,
     dia_semana VARCHAR(15) NOT NULL,
     militar_id INTEGER,
+    categoria VARCHAR(15),
     FOREIGN KEY (militar_id) REFERENCES militares(id),
-    UNIQUE (data, hora, dia_semana)
+    CONSTRAINT unique_agendamento UNIQUE (data, hora, dia_semana, categoria)
 );
 

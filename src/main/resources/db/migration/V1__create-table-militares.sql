@@ -3,5 +3,6 @@ CREATE TABLE militares (
     saram VARCHAR(15) NOT NULL,
     gradposto VARCHAR(50) NOT NULL,
     nome_guerra VARCHAR(50) NOT NULL,
-    OM VARCHAR(15) NOT NULL
+    OM VARCHAR(15) NOT NULL,
+    categoria VARCHAR(15)
 );

@@ -36,5 +36,9 @@ public class MilitarService {
     public void deleteById(Long id) {
         militarRepository.deleteById(id);
     }
+
+    public List<Militar> findByCategoria(String categoria) {
+        return militarRepository.findByCategoria(categoria);
+    }
 }
 

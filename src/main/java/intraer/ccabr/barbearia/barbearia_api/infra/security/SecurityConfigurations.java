@@ -29,7 +29,8 @@ public class SecurityConfigurations {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll() // Apenas para desenvolvimento, remover depois
+                        .requestMatchers(HttpMethod.GET, "/api/militares/categoria/graduado").permitAll() //remover após testes
+                        .requestMatchers(HttpMethod.GET, "/api/militares/categoria/oficial").permitAll() //remover após testes
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

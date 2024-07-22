@@ -19,4 +19,5 @@ public class Militar {
     private String gradposto;
     private String nomeGuerra;
     private String om;
+    private String categoria;
 }
