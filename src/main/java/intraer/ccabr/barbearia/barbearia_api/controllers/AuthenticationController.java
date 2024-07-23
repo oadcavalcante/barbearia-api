@@ -14,10 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -137,20 +134,6 @@ public class AuthenticationController {
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
-    //POST de cadastro.
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterDTO data){
-        if(this.userRepository.findByLogin(data.login()) != null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário já existe");
-        }
-
-        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        User newUser = new User(data.login(), encryptedPassword, data.role());
-        this.userRepository.save(newUser);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário registrado com sucesso");
-    }
-
     private ArrayList<Map<String, String>> getDadosLdap(String user, String senha, DirContext ctx) {
         ArrayList<Map<String, String>> dadosLdap = new ArrayList<>();
 
@@ -188,4 +171,62 @@ public class AuthenticationController {
         Attribute attr = attrs.get(attributeName);
         return (attr != null) ? (String) attr.get() : null;
     }
+
+    //GET para retornar os dados do LDAP do Usuário.
+    @GetMapping("/ldap")
+    public ResponseEntity<List<LdapUserDataDTO>> getLdapData(@RequestParam String login, @RequestParam String password) {
+        DirContext ctx = null;
+        try {
+            Hashtable<String, String> env = new Hashtable<>();
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            env.put(Context.PROVIDER_URL, this.ldapHost);
+            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+            env.put(Context.SECURITY_PRINCIPAL, "uid=" + login + "," + this.ldapBase);
+            env.put(Context.SECURITY_CREDENTIALS, password);
+
+            ctx = new InitialDirContext(env);
+            System.out.println("LDAP conectado com sucesso");
+
+            // Obter dados do LDAP
+            ArrayList<Map<String, String>> dadosLdap = getDadosLdap(login, password, ctx);
+
+            List<LdapUserDataDTO> ldapUserDataList = new ArrayList<>();
+            System.out.println("dadosLdap: " + dadosLdap);
+
+            for (Map<String, String> ldapData : dadosLdap) {
+                LdapUserDataDTO ldapUserData = new LdapUserDataDTO();
+                ldapUserData.setFabGuerra(ldapData.get("FABguerra"));
+                ldapUserData.setFabPostoGrad(ldapData.get("FABpostograd"));
+                ldapUserData.setFabOM(ldapData.get("FABom"));
+                ldapUserData.setFabMail(ldapData.get("mail"));
+                ldapUserData.setFabUid(ldapData.get("uid"));
+                ldapUserData.setFabNrOrdem(ldapData.get("FABnrordem"));
+
+                ldapUserDataList.add(ldapUserData);
+
+                System.out.println("FABguerra: " + ldapUserData.getFabGuerra());
+                System.out.println("FABpostograd: " + ldapUserData.getFabPostoGrad());
+                System.out.println("FABom: " + ldapUserData.getFabOM());
+                System.out.println("mail: " + ldapUserData.getFabMail());
+                System.out.println("uid: " + ldapUserData.getFabUid());
+                System.out.println("FABnrordem: " + ldapUserData.getFabNrOrdem());
+            }
+
+            return ResponseEntity.ok(ldapUserDataList);
+
+        } catch (NamingException e) {
+            System.out.println("Erro ao conectar no LDAP");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } finally {
+            if (ctx != null) {
+                try {
+                    ctx.close();
+                } catch (NamingException e) {
+                    System.out.println("Erro ao fechar contexto LDAP");
+                }
+            }
+        }
+    }
+
+
 }
