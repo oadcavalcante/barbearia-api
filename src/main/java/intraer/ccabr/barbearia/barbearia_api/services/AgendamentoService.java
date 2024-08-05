@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,5 +61,20 @@ public class AgendamentoService {
     // Verifica de acordo com a 'data', 'hora' e 'dia da semana' se o agendamento pode ser feito.
     public boolean isAgendamentoDisponivel(LocalDate data, LocalTime hora, String diaSemana, String categoria) {
         return !agendamentoRepository.existsByDataAndHoraAndDiaSemanaAndCategoria(data, hora, diaSemana, categoria);
+    }
+
+    // Verifica se o militar pode agendar um corte (deve ter 15 dias desde o último agendamento)
+    public boolean podeAgendar(String saram) {
+        LocalDate hoje = LocalDate.now();
+        LocalDate quinzeDiasAtras = hoje.minusDays(15);
+
+        // Obtém o último agendamento, se existir
+        Optional<Agendamento> ultimoAgendamentoOpt = agendamentoRepository.findUltimoAgendamentoBySaram(saram);
+
+        if (ultimoAgendamentoOpt.isPresent()) {
+            Agendamento ultimoAgendamento = ultimoAgendamentoOpt.get();
+            return ultimoAgendamento.getData().isBefore(quinzeDiasAtras);
+        }
+        return true; // Se não houver agendamentos, permite o agendamento
     }
 }

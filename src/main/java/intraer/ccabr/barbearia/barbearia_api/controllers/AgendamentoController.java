@@ -19,17 +19,36 @@ public class AgendamentoController {
 
     // Método CREATE - Salva o Agendamento.
     @PostMapping
-    public ResponseEntity<Agendamento> save(@RequestBody Agendamento agendamento) {
+    public ResponseEntity<Object> save(@RequestBody Agendamento agendamento) {
         try {
-            if (agendamentoService.isAgendamentoDisponivel(agendamento.getData(), agendamento.getHora(), agendamento.getDiaSemana(), agendamento.getCategoria())) {
-                Agendamento savedAgendamento = agendamentoService.save(agendamento);
-                return new ResponseEntity<>(savedAgendamento, HttpStatus.CREATED); //status 201
-            } else {
-                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            if (!isHorarioDisponivel(agendamento)) {
+                return buildResponse("O horário selecionado já está ocupado. Por favor, escolha outro horário.", HttpStatus.CONFLICT);
             }
+
+            String saram = agendamento.getMilitar().getSaram();
+            if (!agendamentoService.podeAgendar(saram)) {
+                return buildResponse("Só é possível agendar a cada 15 dias. Por favor, aguarde antes de fazer um novo agendamento.", HttpStatus.FORBIDDEN);
+            }
+
+            Agendamento savedAgendamento = agendamentoService.save(agendamento);
+            return buildResponse(savedAgendamento, HttpStatus.CREATED);
+
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return buildResponse("Erro interno no servidor. Por favor, tente novamente mais tarde.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private boolean isHorarioDisponivel(Agendamento agendamento) {
+        return agendamentoService.isAgendamentoDisponivel(
+                agendamento.getData(),
+                agendamento.getHora(),
+                agendamento.getDiaSemana(),
+                agendamento.getCategoria()
+        );
+    }
+
+    private ResponseEntity<Object> buildResponse(Object body, HttpStatus status) {
+        return new ResponseEntity<>(body, status);
     }
 
     // Método READ - Lista todos os agendamentos disponíveis.
